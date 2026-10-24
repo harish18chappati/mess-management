@@ -1,22 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Clock3, MapPin, ArrowRight, BookOpen } from 'lucide-react';
-import { CAMPUS_IMAGE, CAMPUS_LOCATION, formatDateDisplay, getIndiaDate, DEMO_MESSES } from '@/data/messData';
+import { CAMPUS_IMAGE, CAMPUS_LOCATION, formatDateDisplay, getIndiaDate } from '@/data/messData';
 import { useParallax } from '@/hooks/useParallax';
 
 interface HeroSectionProps {
   onCheckWait: () => void;
   onExploreMenu: () => void;
+  openMessCount: number | null;
+  isLoadingMessStatus: boolean;
 }
 
-export default function HeroSection({ onCheckWait, onExploreMenu }: HeroSectionProps) {
+export default function HeroSection({
+  onCheckWait,
+  onExploreMenu,
+  openMessCount,
+  isLoadingMessStatus,
+}: HeroSectionProps) {
   const [currentDate, setCurrentDate] = useState('');
   const parallaxRef = useParallax<HTMLDivElement>(0.08);
 
   useEffect(() => {
     setCurrentDate(formatDateDisplay(getIndiaDate()));
   }, []);
-
-  const openMess = DEMO_MESSES.filter((m) => m.status === 'OPEN').length;
 
   return (
     <section
@@ -28,11 +33,11 @@ export default function HeroSection({ onCheckWait, onExploreMenu }: HeroSectionP
         <img
           src={CAMPUS_IMAGE}
           alt="Campus dining"
-          className="w-full h-[120%] object-cover"
+          className="w-full h-[120%] object-cover brightness-105 contrast-[1.02]"
           loading="eager"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-cinema-bg via-cinema-bg/80 to-cinema-bg/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-cinema-bg via-transparent to-cinema-bg/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-cinema-bg/70 via-cinema-bg/35 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-cinema-bg/80 via-transparent to-cinema-bg/15" />
       </div>
 
       {/* Content */}
@@ -98,9 +103,18 @@ export default function HeroSection({ onCheckWait, onExploreMenu }: HeroSectionP
               <span>{CAMPUS_LOCATION}</span>
             </div>
             <div className="flex items-center gap-1.5 text-cinema-secondary">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-              <span>{openMess} messes open</span>
-              <span className="text-cinema-secondary/50 ml-1">(demo)</span>
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  openMessCount === null ? 'bg-cinema-secondary' : 'bg-green-500'
+                }`}
+              />
+              <span>
+                {isLoadingMessStatus
+                  ? 'Loading mess status…'
+                  : openMessCount === null
+                    ? 'Mess status unavailable'
+                    : `${openMessCount} messes open`}
+              </span>
             </div>
           </div>
         </div>

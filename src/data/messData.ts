@@ -69,8 +69,12 @@ export interface DayMenu {
 
 export const CAMPUS_LOCATION = 'SRM University — AP Campus, Neerukonda';
 
-export const CAMPUS_IMAGE =
-  'https://images.pexels.com/photos/39323513/pexels-photo-39323513.jpeg?auto=compress&cs=tinysrgb&h=650&w=940';
+export const CAMPUS_IMAGE = '/messbackground.png';
+export const MESS_IMAGES: Record<number, string> = {
+  1: 'https://images.pexels.com/photos/35532821/pexels-photo-35532821.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
+  2: 'https://images.pexels.com/photos/11923047/pexels-photo-11923047.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
+  3: 'https://images.pexels.com/photos/37142278/pexels-photo-37142278.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
+};
 
 export const MESS_TIMINGS = [
   { type: 'Breakfast' as MealType, time: '7:00 AM – 9:00 AM', startHour: 7, startMinute: 0, endHour: 9, endMinute: 0, icon: 'Sunrise' as const },
@@ -89,7 +93,7 @@ export const MESS_COUNTERS: Counter[] = [
 export const DEMO_MESSES: MessData[] = [
   {
     id: 1,
-    name: 'Mess 1',
+    name: 'teesta',
     status: 'OPEN',
     waitMinutes: 5,
     queueCount: 8,
@@ -97,12 +101,11 @@ export const DEMO_MESSES: MessData[] = [
     totalCounters: 4,
     lastUpdated: '2 min ago',
     dataFresh: 'Fresh',
-    image:
-      'https://images.pexels.com/photos/35532821/pexels-photo-35532821.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
+    image: MESS_IMAGES[1],
   },
   {
     id: 2,
-    name: 'Mess 2',
+    name: 'vedavathi',
     status: 'CLOSED',
     waitMinutes: null,
     queueCount: 0,
@@ -110,12 +113,11 @@ export const DEMO_MESSES: MessData[] = [
     totalCounters: 4,
     lastUpdated: 'Unavailable',
     dataFresh: 'Unavailable',
-    image:
-      'https://images.pexels.com/photos/11923047/pexels-photo-11923047.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
+    image: MESS_IMAGES[2],
   },
   {
     id: 3,
-    name: 'Mess 3',
+    name: 'ganga-b',
     status: 'OPEN',
     waitMinutes: 12,
     queueCount: 20,
@@ -123,8 +125,7 @@ export const DEMO_MESSES: MessData[] = [
     totalCounters: 4,
     lastUpdated: '1 min ago',
     dataFresh: 'Fresh',
-    image:
-      'https://images.pexels.com/photos/37142278/pexels-photo-37142278.jpeg?auto=compress&cs=tinysrgb&h=650&w=940',
+    image: MESS_IMAGES[3],
   },
 ];
 

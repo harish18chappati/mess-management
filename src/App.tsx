@@ -1,19 +1,23 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { DEMO_MESSES, type MessData } from '@/data/messData';
 import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
 import WaitingSection from '@/components/WaitingSection';
 import MenuSection from '@/components/MenuSection';
 import RatingSection from '@/components/RatingSection';
 import MessTimingsSection from '@/components/MessTimingsSection';
+import ComplaintSection from '@/components/ComplaintSection';
 import Footer from '@/components/Footer';
-
+import { fetchMessStatuses } from '@/services/messStatusService';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 const NAV_ITEMS = [
   { id: 'welcome', label: 'Welcome' },
   { id: 'waiting', label: 'Waiting' },
   { id: 'menu', label: 'Menu' },
   { id: 'rating', label: 'Rating' },
   { id: 'timings', label: 'Mess Timings' },
+  { id: 'complaints', label: 'Complaints' },
 ];
 
 const SECTION_IDS = NAV_ITEMS.map((item) => item.id);
@@ -21,9 +25,58 @@ const SECTION_IDS = NAV_ITEMS.map((item) => item.id);
 export default function App() {
   const [activeSection, setActiveSection] = useState('welcome');
   const [selectedMessId, setSelectedMessId] = useState<number | null>(null);
+  const [messes, setMesses] = useState<MessData[]>(DEMO_MESSES);
+  const [isLoadingMesses, setIsLoadingMesses] = useState(false);
+  const [isLiveFromSupabase, setIsLiveFromSupabase] = useState(false);
+  const [messLoadError, setMessLoadError] = useState<string | null>(null);
   const autoScrollCancelledRef = useRef(false);
   const hasAutoScrolledRef = useRef(false);
   const containerRef = useScrollReveal<HTMLDivElement>();
+
+  const loadMesses = useCallback(async () => {
+    setIsLoadingMesses(true);
+    setMessLoadError(null);
+
+    try {
+      const res = await fetchMessStatuses();
+      setMesses(res.data);
+      setIsLiveFromSupabase(res.isLive);
+    } catch (error) {
+      console.warn('Failed to load live mess status, using demo data:', error);
+      setMesses(DEMO_MESSES);
+      setIsLiveFromSupabase(false);
+    } finally {
+      setIsLoadingMesses(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadMesses();
+
+    if (!isSupabaseConfigured() || !supabase) return;
+
+    // Realtime channel for instant queue updates across student tabs
+    const channel = supabase
+      .channel('public:mess_status_realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'mess_status' },
+        () => {
+          void loadMesses();
+        }
+      )
+      .subscribe();
+
+    // 15-second polling interval as reliable backup
+    const interval = setInterval(() => {
+      void loadMesses();
+    }, 15000);
+
+    return () => {
+      if (supabase) void supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
+  }, [loadMesses]);
 
   // Smooth scroll to a section by id
   const scrollToSection = useCallback((id: string) => {
@@ -122,8 +175,20 @@ export default function App() {
         <HeroSection
           onCheckWait={() => handleNavigate('waiting')}
           onExploreMenu={() => handleNavigate('menu')}
+          openMessCount={
+            isLoadingMesses || messLoadError
+              ? null
+              : messes.filter((mess) => mess.status === 'OPEN').length
+          }
+          isLoadingMessStatus={isLoadingMesses}
         />
         <WaitingSection
+          messes={messes}
+          isLoading={isLoadingMesses}
+          isLive={isLiveFromSupabase}
+          error={messLoadError}
+          onRetry={() => void loadMesses()}
+          onMessUpdated={() => void loadMesses()}
           selectedMessId={selectedMessId}
           onSelectMess={handleSelectMess}
           onViewMenu={() => handleNavigate('menu')}
@@ -131,6 +196,7 @@ export default function App() {
         <MenuSection />
         <RatingSection />
         <MessTimingsSection />
+        <ComplaintSection />
       </main>
 
       <Footer onNavigate={handleNavigate} navItems={NAV_ITEMS} />

@@ -10,18 +10,11 @@ export function useScrollReveal<T extends HTMLElement = HTMLDivElement>() {
 
   useEffect(() => {
     const root = containerRef.current ?? document.body;
-    const elements = root.querySelectorAll('.reveal-hidden');
-
-    if (elements.length === 0) return;
-
     const prefersReducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)'
     ).matches;
 
-    if (prefersReducedMotion) {
-      elements.forEach((el) => el.classList.add('is-visible'));
-      return;
-    }
+    const observedSet = new WeakSet<Element>();
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -39,9 +32,30 @@ export function useScrollReveal<T extends HTMLElement = HTMLDivElement>() {
       }
     );
 
-    elements.forEach((el) => observer.observe(el));
+    function scan() {
+      const elements = root.querySelectorAll('.reveal-hidden');
+      elements.forEach((el) => {
+        if (prefersReducedMotion) {
+          el.classList.add('is-visible');
+        } else if (!observedSet.has(el)) {
+          observedSet.add(el);
+          observer.observe(el);
+        }
+      });
+    }
 
-    return () => observer.disconnect();
+    scan();
+
+    const mutationObserver = new MutationObserver(() => {
+      scan();
+    });
+
+    mutationObserver.observe(root, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+      mutationObserver.disconnect();
+    };
   }, []);
 
   return containerRef;

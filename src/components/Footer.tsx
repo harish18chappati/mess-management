@@ -51,9 +51,10 @@ export default function Footer({ onNavigate, navItems }: FooterProps) {
           <div>
             <h4 className="text-cinema-text text-sm font-semibold mb-3">About</h4>
             <p className="text-cinema-secondary text-xs leading-relaxed">
-              This is a student-facing prototype. Demo data is used throughout
-              and is not live campus information. All three campus messes share
-              the same menu and timetable.
+              This is a student-facing prototype. Mess status comes from
+              Supabase, while menus remain demo content and AI wait estimates
+              use synthetic training data. All three messes share the same
+              timetable.
             </p>
             <p className="text-cinema-secondary/40 text-xs mt-3">
               Not officially endorsed by SRM University.

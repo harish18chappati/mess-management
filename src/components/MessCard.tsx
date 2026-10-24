@@ -1,6 +1,6 @@
 import { Clock3, Users, Calendar, Activity, ArrowRight } from 'lucide-react';
 import type { MessData } from '@/data/messData';
-
+import { useWaitPrediction } from '@/hooks/useWaitPrediction';
 interface MessCardProps {
   mess: MessData;
   isSelected: boolean;
@@ -10,6 +10,7 @@ interface MessCardProps {
 
 export default function MessCard({ mess, isSelected, onSelect, onViewMenu }: MessCardProps) {
   const isOpen = mess.status === 'OPEN';
+  const { predictedWait, loading, error } = useWaitPrediction(mess);
 
   function handleCardClick() {
     onSelect();
@@ -71,13 +72,29 @@ export default function MessCard({ mess, isSelected, onSelect, onViewMenu }: Mes
         </div>
       </div>
 
-      {/* Body — wait time is the hero number */}
+      {/* Body — show only the estimate returned by the ML API */}
       <div className="p-5 space-y-4">
-        {/* Wait time — large and prominent */}
         <div>
-          <p className="text-cinema-secondary text-xs font-medium mb-1">Estimated Wait</p>
+          <p className="text-cinema-secondary text-xs font-medium mb-1">
+            {predictedWait !== null ? 'AI demo estimate' : 'Estimated Wait'}
+          </p>
           <div className="flex items-baseline gap-2">
-            {mess.waitMinutes !== null ? (
+            {mess.status !== 'OPEN' ? (
+              <span className="text-xl font-medium text-cinema-secondary">
+                Mess closed
+              </span>
+            ) : loading ? (
+              <span className="text-sm text-cinema-secondary">Predicting…</span>
+            ) : predictedWait !== null ? (
+              <>
+                <span className="font-serif text-4xl font-semibold text-cinema-text leading-none">
+                  {predictedWait}
+                </span>
+                <span className="text-sm text-cinema-secondary font-medium">
+                  min
+                </span>
+              </>
+            ) : mess.waitMinutes !== null ? (
               <>
                 <span className="font-serif text-4xl font-semibold text-cinema-text leading-none">
                   {mess.waitMinutes}
@@ -85,9 +102,16 @@ export default function MessCard({ mess, isSelected, onSelect, onViewMenu }: Mes
                 <span className="text-sm text-cinema-secondary font-medium">min</span>
               </>
             ) : (
-              <span className="text-xl font-medium text-cinema-secondary">Unavailable</span>
+              <span className="text-xl font-medium text-cinema-secondary">
+                {error ? 'Prediction unavailable' : 'Unavailable'}
+              </span>
             )}
           </div>
+          {predictedWait !== null && (
+            <p className="text-cinema-secondary text-[10px] mt-2">
+              Trained on synthetic data; not an accurate real-world prediction.
+            </p>
+          )}
         </div>
 
         {/* Stats row */}
