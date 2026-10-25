@@ -10,7 +10,7 @@ The project aims to improve the campus dining experience by combining a responsi
 
 ## ✨ Features
 
-- **⏱️ Mess Waiting-Time Information** — View queue counts, estimated waiting times, counter availability, and mess status.
+- **⏱️ Mess Waiting-Time Information** — View queue counts, estimate waiting times, counter availability, and mess status.
 - **🍛 Daily Menu** — Explore meal information for breakfast, lunch, snacks, and dinner.
 - **📅 Weekly Menu** — Navigate between days to view the corresponding menu when data is available.
 - **⭐ Food Ratings** — Share feedback about the campus food experience.
